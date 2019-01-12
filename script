@@ -1,0 +1,4 @@
+lex compv1.l
+yacc -d compv1.y
+g++ lex.yy.c y.tab.c -o comp -lfl
+./comp < in

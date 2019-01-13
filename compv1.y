@@ -5,7 +5,7 @@
 	extern int yylex(); //returneaza numele unui atom lexical
 	int yyerror(const char *msg);
 
-
+        int read_write=0;
      	int EsteCorecta = 0;
 	char msg[500];
 class TVAR
@@ -134,7 +134,7 @@ idList :  idList ',' TOK_IDENTIFIER
 		{
 			ts->add($3);
 		}
-		else
+		else if(ts->exists($1) ==1 && read_write==0)
 		{
 		  sprintf(msg, "%d:%d Eroare semantica: Variabila %s a mai fost declarata!", @1.first_line, @1.first_column, $3);
 			yyerror(msg);
@@ -156,7 +156,7 @@ idList :  idList ',' TOK_IDENTIFIER
 		{
 			ts->add($1);
 		}
-		else if(ts->getValue($1)==-1 && ts->exists($1) ==1)
+		else if(ts->exists($1) ==1 && read_write==0)
 		{
 		  sprintf(msg, "%d:%d Eroare semantica: Variabila %s a mai fost declarata !", @1.first_line, @1.first_column, $1);
 			yyerror(msg);
@@ -244,16 +244,16 @@ FACTOR : TOK_IDENTIFIER
         TOK_INT
           |
        TOK_LEFT EXP TOK_RIGHT;
-Read : TOK_READ TOK_LEFT idList TOK_RIGHT
+Read : TOK_READ TOK_LEFT{read_write=1;} idList TOK_RIGHT{read_write=0;}
 {
 
   
 		if(ts!=NULL)
 		{
- 			if( ts->exists($3)==0)
+ 			if( ts->exists($4)==0)
 			{
 				
-	sprintf(msg,"%d:%d Eroare semantica: Variabila %s este utilizata fara sa fi fost declarata!", @1.first_line, @1.first_column, $3);
+	sprintf(msg,"%d:%d Eroare semantica: Variabila %s este utilizata fara sa fi fost declarata!", @1.first_line, @1.first_column, $4);
 	    yyerror(msg);
 	    YYERROR;  
 			}
@@ -261,17 +261,17 @@ Read : TOK_READ TOK_LEFT idList TOK_RIGHT
 		}
 	
 };
-Write : TOK_WRITE TOK_LEFT idList TOK_RIGHT
+Write : TOK_WRITE TOK_LEFT{read_write=1;} idList TOK_RIGHT{read_write=0;}
 {
 
   
 	
 		if(ts!=NULL)
 		{
- 			if( ts->exists($3)==0)
+ 			if( ts->exists($4)==0)
 			{
 				
-	sprintf(msg,"%d:%d Eroare semantica: Variabila %s este utilizata fara sa fi fost declarata!", @1.first_line, @1.first_column, $3);
+	sprintf(msg,"%d:%d Eroare semantica: Variabila %s este utilizata fara sa fi fost declarata!", @1.first_line, @1.first_column, $4);
 	    yyerror(msg);
 	    YYERROR;  
 			}
@@ -316,6 +316,7 @@ int main()
 	
        return 0;
 }
+
 
 
 
